@@ -1,0 +1,118 @@
+############################################################################
+############################### UBUNTU NOTES ###############################
+
+This is a tested procedure to make a fresh install of Ubuntu 14.04
+run Confidant Mail. This assumes you have downloaded confmail-src.zip
+You verify the source package using the detached signature and GPG key.
+Unfortunately there is no package of wxPython-3.0.2.0 so here is how
+to compile it. You also have to replace some of the Python modules to
+make TLS 1.2 work.
+
+Download wxPython-src-3.0.2.0.tar.bz2 from:
+http://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/wxPython-src-3.0.2.0.tar.bz2/download
+
+apt-get install gcc g++ python-dev
+apt-get install libgtk2.0-dev libgtk-3-dev
+tar xpjf wxPython-src-3.0.2.0.tar.bz2
+cd wxPython-src-3.0.2.0/wxPython
+vi ../build/tools/build-wxwidgets.py
+    remove lines: --with-opengl (line 271) and --enable-mediactrl (line 274)
+    use a different editor such as nano if you prefer
+python build-wxpython.py '--extra_setup=BUILD_GLCANVAS=0' --install
+apt-get remove python-openssl
+apt-get remove python-crypto
+apt-get install python-pip python-cffi libssl-dev
+pip install pyopenssl
+pip install cryptography
+pip install service_identity
+pip install twisted
+pip install pyenchant
+
+[Startup script for Confidant Mail]
+#!/bin/bash
+cd [directory you unzipped confmail-src.zip into]
+export LD_LIBRARY_PATH=/usr/local/lib
+exec python config_chooser.py
+
+############################################################################
+############################### MACOS NOTES ################################
+
+MacOS 10.9 install procedure 2015-02-01
+
+On MacOS 10.9 with Homebrew freshly installed, these steps will prepare
+the machine to run Confidant Mail.
+
+brew install python
+brew install wxPython
+brew install openssl
+brew install gpg
+pip uninstall cryptography
+pip install --global-option=build_ext \
+  --global-option="-I/usr/local/Cellar/openssl/1.0.2/include" \
+  --global-option=build_ext \
+  --global-option="-L/usr/local/Cellar/openssl/1.0.2/lib" \
+  cryptography
+pip install twisted
+pip install PyOpenSSL
+pip install service_identity
+pip install pyenchant
+
+Afterward just download confmail-src.zip, unzip it, and run:
+/usr/local/bin/python config_chooser.py
+
+---------------------------------------------------------------------------
+MacOS Porting Notes by inglem 2015-01-26
+
+Confidant Mail can be made to work on a Macintosh.
+
+I do not have a Macintosh, and I do not have detailed knowledge of MacOS.
+However, I was able to test the program on MacOS 10.9 with xcode 6.1.1 and
+wxPython-3.0-osx-3.0.2.0-cocoa-py2.7.dmg, using the default python 2.7 and
+gpg provided by Apple.
+
+After I made minor changes to the configuration dialog to get it to work
+(grep for "darwin"), the UI is functional if not pretty.
+
+There is a more serious problem with OpenSSL. The version included is very
+old, and does not support TLS 1.2, therefore the code as written will not
+make TLS connections, and is unusable.
+
+Next I tried Homebrew, using the python 2.7 and OpenSSL 1.0.2 provided.
+I installed all the necessary components using brew and pip, and it almost
+worked. The TLSv1_2_METHOD was failing mysteriously.
+
+Here is the result of several hours of debugging: the python cryptography
+library, by default, is linking against the headers of the system-provided
+openssl (the old version), so even though python is dynamic-loading OpenSSL
+v1.0.2 (as determined by "lsof" command), it does not know about the new
+features such as TLS 1.2!
+
+The fix is:
+brew install openssl
+pip uninstall cryptography
+pip install --global-option=build_ext \
+  --global-option="-I/usr/local/Cellar/openssl/1.0.2/include" \
+  --global-option=build_ext \
+  --global-option="-L/usr/local/Cellar/openssl/1.0.2/lib" \
+  cryptography
+
+Once this evil little bug is squashed, the program works fine.
+
+############################################################################
+############################## WINDOWS NOTES ###############################
+
+In C:\Python27\Lib\site-packages\zope make blank __init__.py
+C:\projects\confmail\cryptography-0.7.x>set INCLUDE=C:\OpenSSL-Win32\include
+C:\projects\confmail\cryptography-0.7.x>set LIB=C:\OpenSSL-Win32\lib\VC\static
+C:\projects\confmail\cryptography-1.3.1>set LIB=C:\OpenSSL-Win32\lib\VC\static;C:\OpenSSL-Win32\lib
+Rename the crypt*pyd files to remove cryptography.
+cryptography-master\src\cryptography\hazmat\bindings\utils.py
+Verifier( line
+change: tmpdir=os.path.dirname(os.path.realpath(sys.argv[0])),
+python setup.py build
+python setup.py install
+
+Run make_release.cmd
+
+Unofficial binaries http://www.lfd.uci.edu/~gohlke/pythonlibs/#twisted
+pip install --upgrade cx_Freeze==4.3.3
