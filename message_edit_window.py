@@ -437,6 +437,10 @@ class MessageEditFrame(wx.Frame):
 		self.Bind(wx.EVT_TOOL,self.OnCancelClick,id = id_cancel)
 		self.toolbar.Realize()
 
+		keyicon_bmp = images2.key_icon.GetBitmap()
+		keyicon = wx.IconFromBitmap(keyicon_bmp)
+		self.SetIcon(keyicon)
+
 		self.horizontalSplitter = wx.SplitterWindow(self,style = wx.SP_LIVE_UPDATE)
 		self.mainSizer = wx.BoxSizer(wx.VERTICAL)
 		self.addressGrid = AddressGrid(self.horizontalSplitter,self,8)
@@ -674,6 +678,7 @@ class MessageEditFrame(wx.Frame):
 			buf.close()
 		self.addressGrid.EndBatch()
 		self.addressGrid.AdjustSash()
+		self.addressGrid.SetRowLabelSize(wx.grid.GRID_AUTOSIZE)
 		if sent_mode == True:
 			self.rtc.SetEditable(False)
 

@@ -2274,6 +2274,9 @@ class CertViewFrame(wx.Frame):
 		self.textCtrl = wx.TextCtrl(self, style=wx.HSCROLL|wx.TE_MULTILINE|wx.TE_READONLY)
 		self.mainSizer.Add(self.textCtrl,1,wx.EXPAND,0)
 		self.textCtrl.SetValue(text)
+		keyicon_bmp = images2.key_icon.GetBitmap()
+		keyicon = wx.IconFromBitmap(keyicon_bmp)
+		self.SetIcon(keyicon)
 		self.Show()
 	
 class RunApp(wx.App):

@@ -5,6 +5,7 @@ import re
 import wx
 import wx.lib.mixins.listctrl as listmix
 import images
+import images2
 import global_config
 import filestore
 import flatstore
@@ -219,6 +220,10 @@ class AddressBookFrame(wx.Frame):
 		self.lastSearchUpdate = 0.0
 		self.lastSearchUpdateSkipped = False
 		self.viewImportMode = False
+
+		keyicon_bmp = images2.key_icon.GetBitmap()
+		keyicon = wx.IconFromBitmap(keyicon_bmp)
+		self.SetIcon(keyicon)
 
 	def OnTo(self,event):
 		self.addRecipients('T')

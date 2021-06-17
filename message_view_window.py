@@ -579,6 +579,9 @@ class MessageViewFrame(wx.Frame):
 			self.Bind(wx.EVT_TOOL,self.OnDeleteClick,id = id_delete)
 		self.Bind(wx.EVT_TOOL,self.OnCancelClick,id = id_cancel)
 		self.Bind(wx.EVT_TIMER,self.OnReenableShowOriginalTimer,id = id_reenable_show_original_timer)
+		keyicon_bmp = images2.key_icon.GetBitmap()
+		keyicon = wx.IconFromBitmap(keyicon_bmp)
+		self.SetIcon(keyicon)
 
 		self.horizontalSplitter = wx.SplitterWindow(self,style = wx.SP_LIVE_UPDATE)
 		self.mainSizer = wx.BoxSizer(wx.VERTICAL)
