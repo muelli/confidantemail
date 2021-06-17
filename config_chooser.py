@@ -91,6 +91,15 @@ class ChooserDialogFrame(wx.Frame):
 		self.chooserList.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.OnActivateRow)
 		self.Bind(wx.EVT_CLOSE,self.OnClose)
 
+		# window size check and fix
+		xo,yo = size
+		xr,yr = mainSizer.ComputeFittingWindowSize(self)
+		if xo < xr or yo < yr:
+			xn = int(1.1 * xr) if xr > xo else xo
+			yn = int(1.1 * yr) if yr > yo else yo
+			self.SetSize( (xn,yn) )
+		# window size check and fix
+
 		keyicon_bmp = images2.key_icon.GetBitmap()
 		keyicon = wx.IconFromBitmap(keyicon_bmp)
 		self.SetIcon(keyicon)
@@ -253,7 +262,7 @@ class RunApp(wx.App):
 		wx.App.__init__(self, redirect=False)
 
 	def OnInit(self):
-		self.frame = ChooserDialogFrame(None,[ 720,540 ],self.homedir,account_already_open = self.account_already_open)
+		self.frame = ChooserDialogFrame(None,[ int(global_config.resolution_scale_factor*720),int(global_config.resolution_scale_factor*540) ],self.homedir,account_already_open = self.account_already_open)
 		self.frame.app = self
 		self.frame.Show()
 		self.SetTopWindow(self.frame)
@@ -294,6 +303,10 @@ if __name__ == "__main__":
 			n += 1
 		elif cmd == '-debug':
 			log_debug = True
+			n += 1
+		elif cmd == '-scale':
+			n += 1
+			global_config.resolution_scale_factor = float(cmdline[n])
 			n += 1
 		else:
 			print "unknown: ",cmd

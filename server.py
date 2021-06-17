@@ -578,9 +578,15 @@ class serverProtocol(twisted.protocols.basic.LineReceiver):
 				else:
 					self.sendLineLog("FAILED")
 			elif self.command == c_store_proxy and len(self.lines) > 0:
-				self.storeProxy(None)
+				if ((self.factory.proxy_requires_login == False) or (self.authenticated == True)):
+					self.storeProxy(None)
+				else:
+					self.sendLineLog("FAILED")
 			elif self.command == c_store_proxy_after and len(self.lines) > 0:
-				self.storeProxy(self.embargo)
+				if ((self.factory.proxy_requires_login == False) or (self.authenticated == True)):
+					self.storeProxy(self.embargo)
+				else:
+					self.sendLineLog("FAILED")
 			elif self.command == c_store_entangled and len(self.lines) > 0:
 				self.storeEntangled()
 		self.state = s_waitcmd
@@ -894,7 +900,7 @@ class serverProtocol(twisted.protocols.basic.LineReceiver):
 class serverProtocolFactory(twisted.internet.protocol.ServerFactory):
 	def __init__(self,filestore,inputstore,sender,sendqueue,replication_peer,storethread, \
 				 entangled_node,ssl_ctx,authfile,ssl_key_file,max_connections,log_all_traffic, \
-				 timeout,slowest_connection,permit_dns_txt,preferred_connection):
+				 timeout,slowest_connection,permit_dns_txt,preferred_connection,proxy_requires_login):
 		self.logger = logging.getLogger(__name__)
 		self.filestore = filestore
 		self.inputstore = inputstore
@@ -914,6 +920,7 @@ class serverProtocolFactory(twisted.internet.protocol.ServerFactory):
 		self.slowestConnection = slowest_connection # bytes per second
 		self.permit_dns_txt = permit_dns_txt
 		self.preferred_connection = preferred_connection
+		self.proxy_requires_login = proxy_requires_login
 		self.shutdown_in_progress = False
 
 		try:
@@ -954,6 +961,7 @@ def startup(homedir,log_level,log_all_traffic):
 	preferred_connection = 'Direct'
 	permit_dns_txt = True
 	enable_ipv6 = False
+	proxy_requires_login = False
 	timeout = 60
 	max_connections = 20
 	run_queue_interval = 120
@@ -1038,6 +1046,8 @@ def startup(homedir,log_level,log_all_traffic):
 			max_age_claim = int(pval)
 		elif param == 'use_exit_node' and pval.lower() == 'true':
 			use_exit_node = True
+		elif param == 'proxy_requires_login' and pval.lower() == 'true':
+			proxy_requires_login = True
 		elif param == 'enable_ipv6' and pval.lower() == 'true':
 			enable_ipv6 = True
 		elif param == 'permit_dns_txt' and pval.lower() == 'false':
@@ -1110,7 +1120,7 @@ def startup(homedir,log_level,log_all_traffic):
 	if enable_ipv6:
 		endpoint6 = twisted.internet.endpoints.TCP6ServerEndpoint(twisted.internet.reactor,server_port)
 	#SSL#endpoint = twisted.internet.endpoints.SSL4ServerEndpoint(twisted.internet.reactor,server_port,ssl_context_factory)
-	factory = serverProtocolFactory(localstore,inputstore,sender,sendqueue,replication_peer,storethread,entangled_node,ssl_context_factory,authfile,ssl_key_file,max_connections,log_all_traffic,timeout,slowest_connection,permit_dns_txt,preferred_connection)
+	factory = serverProtocolFactory(localstore,inputstore,sender,sendqueue,replication_peer,storethread,entangled_node,ssl_context_factory,authfile,ssl_key_file,max_connections,log_all_traffic,timeout,slowest_connection,permit_dns_txt,preferred_connection,proxy_requires_login)
 	endpoint.listen(factory)
 	if enable_ipv6:
 		endpoint6.listen(factory)

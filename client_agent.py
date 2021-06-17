@@ -228,7 +228,7 @@ class client_agent:
 		self.temp_gpg = gnupg.GPG(gpgbinary = global_config.gnupg_path,verbose = False,options = global_config.gpg_opts,gnupghome = self.gpg_tempdir)
 		self.temp_gpg.encoding = 'utf-8'
 		self.passphrase = None
-		self.post_message = postmessage.postmessage(self.gpg,self.outbox_store,self.entangled_server,self.torProxy,self.i2pProxy,self.socksProxy,self.proxyIP,self.proxyTOR,self.proxyI2P,self.useExitNode,self.serverConnection,self.send_timeout,self.log_traffic_callback)
+		self.post_message = postmessage.postmessage(self.gpg,self.outbox_store,self.entangled_server,self.torProxy,self.i2pProxy,self.socksProxy,self.proxyIP,self.proxyTOR,self.proxyI2P,self.useExitNode,self.serverConnection,self.send_timeout,self.log_traffic_callback,self.client_keyid_hex,self.authKey)
 
 		self.keyannounce = keyannounce.keyannounce(self.gpg,self.torProxy,self.i2pProxy,self.socksProxy,self.proxyIP,self.proxyTOR,self.proxyI2P,self.useExitNode,self.serverConnection,self.log_traffic_callback)
 		self.valmerge = validate_merge.validate_merge(self.gpg,self.keyannounce)

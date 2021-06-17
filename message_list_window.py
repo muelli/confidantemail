@@ -53,26 +53,27 @@ id_popup_archive = 21
 id_popup_delete = 22
 id_popup_open = 23
 id_popup_open_txt = 24
-id_popup_reply = 25
-id_popup_reply_all = 26
-id_popup_fwd_txt = 27
-id_popup_fwd_all = 28
-id_popup_mark_read = 29
-id_popup_mark_unread = 30
-id_popup_set_template = 31
-id_popup_unset_template = 32
-id_popup_delete_refetch = 33
-id_popup_color_black = 34
-id_popup_color_blue = 35
-id_popup_color_cyan = 36
-id_popup_color_green = 37
-id_popup_color_yellow = 38
-id_popup_color_light_grey = 39
-id_popup_color_red = 40
-id_new_category = 41
-id_delete_category = 42
-id_rename_category = 43
-id_clear_status_timer = 44
+id_popup_open_rt = 25
+id_popup_reply = 26
+id_popup_reply_all = 27
+id_popup_fwd_txt = 28
+id_popup_fwd_all = 29
+id_popup_mark_read = 30
+id_popup_mark_unread = 31
+id_popup_set_template = 32
+id_popup_unset_template = 33
+id_popup_delete_refetch = 34
+id_popup_color_black = 35
+id_popup_color_blue = 36
+id_popup_color_cyan = 37
+id_popup_color_green = 38
+id_popup_color_yellow = 39
+id_popup_color_light_grey = 40
+id_popup_color_red = 41
+id_new_category = 42
+id_delete_category = 43
+id_rename_category = 44
+id_clear_status_timer = 45
 id_file_exit = 101
 id_edit_cut = 201
 id_edit_copy = 202
@@ -311,7 +312,7 @@ class MessageListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin, listmix.Colum
 		self.OpenMessageById(messageId,deBold = itemIndex)
 		#DBGOUT#print "activate",row,messageId.encode('hex')
 
-	def OpenMessageById(self,messageId,reopen = False,pos = None,size = None,textOnly = False,deBold = None):
+	def OpenMessageById(self,messageId,reopen = False,pos = None,size = None,textOnly = False,deBold = None,forceRich = False):
 		#DBGOUT#print "OpenMessageById",messageId.encode('hex'),reopen,textOnly
 		found,headers = self.list_frame.folder_store.get_message(messageId)
 		if found == True and headers['TY'] == 'O':
@@ -341,7 +342,7 @@ class MessageListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin, listmix.Colum
 				self.list_frame.folder_store.delete_message_from_folder(folders.id_new_messages,messageId)
 				self.list_frame.folder_store.commit()
 				self.list_frame.ClearNewMessageNotification()
-			frame = message_view_window.MessageViewFrame(self.list_frame,messageId.encode('hex'),self.list_frame.current_folder_path,textOnly = textOnly)
+			frame = message_view_window.MessageViewFrame(self.list_frame,messageId.encode('hex'),self.list_frame.current_folder_path,textOnly = textOnly,forceRich = forceRich)
 			frame.Show()
 			self.list_frame.newMessageFrames.append(frame)
 		elif found == True and headers['TY'] == 'S':
@@ -443,8 +444,10 @@ class MessageListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin, listmix.Colum
 		incomingMessageMenu.AppendSeparator()
 		incomingMessageMenu.Append(id_popup_open,"Open")
 		self.Bind(wx.EVT_MENU,self.list_frame.OnOpenClick,id = id_popup_open)
-		incomingMessageMenu.Append(id_popup_open_txt,"Open Txt")
+		incomingMessageMenu.Append(id_popup_open_txt,"Open Text")
 		self.Bind(wx.EVT_MENU,self.list_frame.OnOpenTxtClick,id = id_popup_open_txt)
+		incomingMessageMenu.Append(id_popup_open_rt,"Open Rich Text")
+		self.Bind(wx.EVT_MENU,self.list_frame.OnOpenRTClick,id = id_popup_open_rt)
 		incomingMessageMenu.Append(id_popup_reply,"Reply")
 		self.Bind(wx.EVT_MENU,self.list_frame.OnReplyClick,id = id_popup_reply)
 		incomingMessageMenu.Append(id_popup_reply_all,"Reply All")
@@ -773,7 +776,7 @@ class MessageListFrame(wx.Frame):
 		self.current_folder_path = None
 		self.openAddressBook = None
 		self.statusBar = self.CreateStatusBar(2)
-		self.statusBar.SetStatusWidths( [-1,200] )
+		self.statusBar.SetStatusWidths( [-1,int(global_config.resolution_scale_factor * 200) ] )
 		self.newMessageFrames = [ ]
 		self.homedir = self.gui.homedir
 		self.checkSendAckActive = False
@@ -906,7 +909,7 @@ class MessageListFrame(wx.Frame):
 
 		#| wx.TB_HORZ_LAYOUT
 		toolbar = self.CreateToolBar( wx.TB_HORIZONTAL | wx.NO_BORDER | wx.TB_FLAT | wx.TB_TEXT )
-		tsize = (24,24)
+		#tsize = (24,24)
 		new_bmp = images2.composition.GetBitmap()
 		getmail_bmp = images2.getmail.GetBitmap()
 		post_key_bmp = images2.post_key.GetBitmap()
@@ -943,11 +946,17 @@ class MessageListFrame(wx.Frame):
 		toolbar.Realize()
 		self.toolbar = toolbar
 
-		verticalSplitter = wx.SplitterWindow(self,style = wx.SP_LIVE_UPDATE)
-		self.folderTree = FolderTree(verticalSplitter,self)
-		self.messageList = MessageListCtrl(verticalSplitter,self)
+		self.verticalSplitter = wx.SplitterWindow(self,style = wx.SP_LIVE_UPDATE)
+		self.folderTree = FolderTree(self.verticalSplitter,self)
+		self.messageList = MessageListCtrl(self.verticalSplitter,self)
+		self.verticalSplitter.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGED,self.OnResizeSplitter)
 
-		verticalSplitter.SplitVertically(self.folderTree,self.messageList,200)
+		found,sashpos = self.folder_store.get_global("SASHPOS")
+		if found:
+			sashpos = int(sashpos)
+		else:
+			sashpos = int(200 * global_config.resolution_scale_factor)
+		self.verticalSplitter.SplitVertically(self.folderTree,self.messageList,sashpos)
 
 		self.folderTree.SelectItem(self.folderTree.folders_by_path[folders.id_inbox])
 
@@ -1282,7 +1291,10 @@ class MessageListFrame(wx.Frame):
 	def OnOpenTxtClick(self,event):
 		return self.OnOpenCommon(event,True)
 
-	def OnOpenCommon(self,event,textOnly):
+	def OnOpenRTClick(self,event):
+		return self.OnOpenCommon(event,False,True)
+
+	def OnOpenCommon(self,event,textOnly,forceRich = False):
 		#DBGOUT#print "open"
 		selectedList = [ ]
 		selected = -1
@@ -1292,7 +1304,7 @@ class MessageListFrame(wx.Frame):
 			if selected < 0:
 				break
 			messageId = self.messageList.rowMessageIds[self.messageList.GetItemData(selected)]
-			self.messageList.OpenMessageById(messageId,textOnly = textOnly,deBold = selected)
+			self.messageList.OpenMessageById(messageId,textOnly = textOnly,deBold = selected,forceRich = forceRich)
 			i += 1
 
 	def OnKeyDown(self,event):
@@ -1370,6 +1382,11 @@ class MessageListFrame(wx.Frame):
 					continue # should not happen
 				if len(folders_containing) == 1: # only in this folder
 					self.folder_store.put_message_in_folder(folders.id_deleted,message)
+				elif self.current_folder_path == folders.id_inbox and len(folders_containing) == 2 and \
+						folders.id_inbox in folders_containing and folders.id_new_messages in folders_containing:
+					# as a special case, delete from inbox also deletes from new messages
+					self.folder_store.put_message_in_folder(folders.id_deleted,message)
+					self.folder_store.delete_message_from_folder(folders.id_new_messages,message)
 				self.folder_store.delete_message_from_folder(self.current_folder_path,message)
 			self.folder_store.commit()
 			self.OpenMailFolder(self.current_folder_path)
@@ -1593,7 +1610,7 @@ class MessageListFrame(wx.Frame):
 				#DBGOUT#print "putting message "+messageIdH+" in sent folder"
 			self.folder_store.delete_message_from_folder(folders.id_send_pending,messageId)
 			self.folder_store.commit()
-			if self.current_folder_path == folders.id_send_pending or self.current_folder_path == folders.id_sent_messages:
+			if self.current_folder_path == folders.id_send_pending or self.current_folder_path == folders.id_sent_messages or self.current_folder_path == folders.id_ack_pending:
 				self.OpenMailFolder(self.current_folder_path)
 			#DBGOUT#print "message has been sent",folder_list
 		#DBGOUT#else:
@@ -1947,7 +1964,7 @@ class MessageListFrame(wx.Frame):
 				self.AskForPassphrase()
 				return
 			self.rotateKeyDialog = rotate_key_dialog.RotateKeyFrame(self,global_config.gnupg_path,
-				self.homedir,self.client_keyid_hex,self.passphrase,[ 640,540 ])
+				self.homedir,self.client_keyid_hex,self.passphrase,[ int(global_config.resolution_scale_factor*640),int(global_config.resolution_scale_factor*540) ])
 			self.rotateKeyDialog.Show()
 		else:
 			self.rotateKeyDialog.SetFocus()
@@ -2228,6 +2245,9 @@ class MessageListFrame(wx.Frame):
 			self.trayIcon.Destroy()
 			self.trayIcon = None
 	
+	def OnResizeSplitter(self,event):
+		self.folder_store.set_global("SASHPOS",str(self.verticalSplitter.GetSashPosition()))
+
 	def OnClose(self,event):
 		self.RemoveTrayIcon()
 		self.gui.acceptingEvents = False

@@ -94,6 +94,15 @@ class RepairFrame(wx.Frame):
 			"Press Check to verify the integrity of the Folder Index, Repair to " +
 			"rebuild the Folder Index, or Cancel to abort.")
 
+		# window size check and fix
+		xo,yo = size
+		xr,yr = mainSizer.ComputeFittingWindowSize(self)
+		if xo < xr or yo < yr:
+			xn = int(1.1 * xr) if xr > xo else xo
+			yn = int(1.1 * yr) if yr > yo else yo
+			self.SetSize( (xn,yn) )
+		# window size check and fix
+
 	def OutputText(self,str):
 		self.textCtrl.AppendText(str + "\n")
 
@@ -453,15 +462,11 @@ class RunApp(wx.App):
 		wx.App.__init__(self, redirect=False)
 
 	def OnInit(self):
-		self.frame = RepairFrame(None,[ 640,540 ],self.homedir,pos = self.pos)
+		self.frame = RepairFrame(None,[ int(global_config.resolution_scale_factor*640),int(global_config.resolution_scale_factor*540) ],self.homedir,pos = self.pos)
 		self.frame.Show()
 		self.SetTopWindow(self.frame)
 		return True
 
-#if __name__ == "__main__":
-#	
-#	app = RunApp("c:\\projects\\confidantmail\\client2") # TODO remove
-#	app.MainLoop()
 
 # EOF
 

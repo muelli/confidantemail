@@ -53,7 +53,7 @@ def re_order_servers(server_list,anon_first,server_connection):
 
 class postmessage:
 
-	def __init__(self,gnupg,outbox_store,entangled_server,tor_proxy,i2p_proxy,socks_proxy,proxy_ip,proxy_tor,proxy_i2p,use_exit_node,server_connection,timeout,log_traffic_callback):
+	def __init__(self,gnupg,outbox_store,entangled_server,tor_proxy,i2p_proxy,socks_proxy,proxy_ip,proxy_tor,proxy_i2p,use_exit_node,server_connection,timeout,log_traffic_callback,userhash = None,authkey = None):
 		self.gnupg = gnupg
 		self.logger = logging.getLogger(__name__)
 		self.update_timestamp()
@@ -77,6 +77,8 @@ class postmessage:
 		self.log_traffic_callback = log_traffic_callback
 		self.throttle_kbps = None
 		self.shutdown_flag = False
+		self.userhash = userhash
+		self.authkey = authkey
 
 	def update_timestamp(self):
 		self.nowtime = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -721,6 +723,7 @@ class postmessage:
 		if self.proxy_send_mode == True:
 			if len(self.proxy_servers) == 0:
 				self.proxy_servers = self.entangled_server[7:].split(',')
+				self.proxy_servers = re_order_servers(self.proxy_servers,self.use_exit_node,self.server_connection)
 			proxy_via = self.proxy_servers.pop(0)
 			nethost,netport = proxy_via.rsplit(':',1)
 			netport = int(netport)
@@ -759,7 +762,10 @@ class postmessage:
 		else:
 			pass #DBGOUT#self.logger.debug("Starting connection %s %i direct",nethost,netport)
 		clientProt = client.clientProtocol(self.post_client_completion_callback,None,self.timeout,logCallback = self.log_traffic_callback)
-		clientProt.openConnection(endpoint)
+		if self.proxy_send_mode == True:
+			clientProt.openConnection(endpoint,userhash = self.userhash,authkey = self.authkey)
+		else:
+			clientProt.openConnection(endpoint)
 
 	def start_new_target(self):
 		if self.shutdown_flag == True or len(self.post_targets_list) == 0:

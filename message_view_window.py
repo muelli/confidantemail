@@ -118,6 +118,7 @@ class AddressGrid(wx.grid.Grid):
 		wx.CallAfter(self.AdjustSash)
 		self.SetSelectionMode(wx.grid.Grid.SelectRows)
 		self.HideColLabels()
+		self.SetRowLabelSize(wx.grid.GRID_AUTOSIZE)
 		self.Bind(wx.EVT_SIZE,self.OnResize)
 		self.parent.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGED,self.OnSashPosChanged)
 		self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK,self.OnLeftClickCell)
@@ -245,6 +246,28 @@ class AddressGrid(wx.grid.Grid):
 				outFile = outPath + os.sep + fn
 				saveAttachList.append( (fn,outFile) )
 
+		nExist =0
+		existList = ''
+		for filepair in saveAttachList:
+			zipPath,outPath = filepair
+			if os.path.exists(outPath):
+				nExist += 1
+				if nExist > 1:
+					existList = existList + "\n" + outPath
+				else:
+					existList = outPath	
+		if nExist > 0:
+			if nExist > 1:
+				message = "Files exist:\n" + existList + "\nDo you want to replace them?"	
+			else:
+				message = "File exists:\n" + existList + "\nDo you want to replace it?"	
+			dlg = wx.MessageDialog(self,message,"Confirm overwrite",wx.YES_NO|wx.CENTRE|wx.ICON_EXCLAMATION)
+			if dlg.ShowModal() != wx.ID_YES:
+				dlg.Destroy()
+				return
+			else:
+				dlg.Destroy()
+					
 		totalSize = long(0)
 		self.topFrame.openZipIfClosed()
 		for member in self.topFrame.zipFile.infolist():
@@ -349,7 +372,7 @@ class AddressGrid(wx.grid.Grid):
 
 class MessageViewFrame(wx.Frame):
 
-	def __init__(self,parent,messageId,fromFolder,systemMessage = None,textOnly = False):
+	def __init__(self,parent,messageId,fromFolder,systemMessage = None,textOnly = False,forceRich = False):
 		self.parent = parent
 		self.gui = self.parent.gui
 		self.zipFile = None
@@ -377,6 +400,7 @@ class MessageViewFrame(wx.Frame):
 		self.fontSize = 10
 		self.forwardedMessageId = None
 		self.findDialog = None
+		self.untrustedMessage = False
 
 		self.zipFile = zipfile.ZipFile(self.zipFilePath,'r')
 		self.headerData = self.zipFile.read('HEADER.TXT').decode('utf-8')
@@ -433,6 +457,7 @@ class MessageViewFrame(wx.Frame):
 		if sigKeyMatch == False:
 			self.sigData += "From line fingerprint does not match signature fingerprint.\n" + \
 				"This may be a forgery attempt.\n"
+			self.untrustedMessage = True
 				
 		#DBGOUT#print sigGotValid,sigKeyMatch
 		if sigGotValid == True and sigKeyMatch == True:
@@ -469,8 +494,13 @@ class MessageViewFrame(wx.Frame):
 							sigFingerprint + "\nhave the same email address " + address + "\n" + \
 							"One of these may be a forged key. Delete the forged key\n" + \
 							"from your Address Book to make this message go away.\n"
+						self.untrustedMessage = True
 		else:
 			self.sigStatus = "BAD SIGNATURE! Click for details"
+			self.untrustedMessage = True
+
+		if self.untrustedMessage == True and forceRich == False:
+			textOnly = True # avoid opening untrusted message Rich Text which might enable an exploit against Wx
 
 		for member in self.zipFile.infolist():
 			if member.filename[0] == '_':
@@ -574,6 +604,9 @@ class MessageViewFrame(wx.Frame):
 			try:
 				bodyText = self.zipFile.read('BODY.TXT')
 				bodyText = bodyText.decode('utf-8')
+				if self.untrustedMessage == True and forceRich == False:
+					bodyText = "Untrusted message opened text-only. To force Rich Text, use\nOpen Rich Text from the message list right-click menu.\n" + \
+						"________________________________________________________________________________\n\n" + bodyText
 			except (IOError,KeyError):
 				pass
 		wx.CallAfter(self.initCont,bodyHtml,bodyXml,bodyText)
@@ -864,6 +897,14 @@ class MessageViewFrame(wx.Frame):
 		if result != wx.ID_OK:
 			return
 		outPath = fileDialog.GetPath()
+		if os.path.exists(outPath):
+			message = "File exists:\n" + outPath + "\nDo you want to replace it?"	
+			dlg = wx.MessageDialog(self,message,"Confirm overwrite",wx.YES_NO|wx.CENTRE|wx.ICON_EXCLAMATION)
+			if dlg.ShowModal() != wx.ID_YES:
+				dlg.Destroy()
+				return
+			else:
+				dlg.Destroy()
 		try:
 			fh = codecs.open(outPath,'w','utf-8')
 			fh.write(self.CreatePrintHTML())

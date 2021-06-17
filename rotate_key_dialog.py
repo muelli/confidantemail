@@ -80,6 +80,15 @@ class RotateKeyFrame(wx.Frame):
 		self.textCtrl.AppendText( \
 			"\nClick [Rotate Key] to proceed, [Help] for details, or [Cancel] to abort.\n")
 
+		# window size check and fix
+		xo,yo = size
+		xr,yr = mainSizer.ComputeFittingWindowSize(self)
+		if xo < xr or yo < yr:
+			xn = int(1.1 * xr) if xr > xo else xo
+			yn = int(1.1 * yr) if yr > yo else yo
+			self.SetSize( (xn,yn) )
+		# window size check and fix
+
 	def OutputText(self,str):
 		self.textCtrl.AppendText(str + "\n")
 

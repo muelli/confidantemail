@@ -407,7 +407,7 @@ class NetworkPanel(wx.Panel):
 		labelTorAddr = wx.StaticText(self,-1,"TOR Proxy address",size=(x,-1),style=wx.ALIGN_RIGHT)
 		self.textTorAddr = wx.TextCtrl(self,-1,"")
 		labelTorPort = wx.StaticText(self,-1,"port")
-		self.textTorPort = wx.TextCtrl(self,-1,"",size=(80,-1))
+		self.textTorPort = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		hsizerT.Add(labelTorAddr,0,wx.ALL,3)
 		hsizerT.Add(self.textTorAddr,1,wx.ALL|wx.GROW,3)
 		hsizerT.Add(labelTorPort,0,wx.ALL,3)
@@ -417,7 +417,7 @@ class NetworkPanel(wx.Panel):
 		labelI2PAddr = wx.StaticText(self,-1,"I2P Proxy address",size=(x,-1),style=wx.ALIGN_RIGHT)
 		self.textI2PAddr = wx.TextCtrl(self,-1,"")
 		labelI2PPort = wx.StaticText(self,-1,"port")
-		self.textI2PPort = wx.TextCtrl(self,-1,"",size=(80,-1))
+		self.textI2PPort = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		hsizerI.Add(labelI2PAddr,0,wx.ALL,3)
 		hsizerI.Add(self.textI2PAddr,1,wx.ALL|wx.GROW,3)
 		hsizerI.Add(labelI2PPort,0,wx.ALL,3)
@@ -426,7 +426,7 @@ class NetworkPanel(wx.Panel):
 		hsizerSO = wx.BoxSizer(wx.HORIZONTAL)
 		self.textSocksAddr = wx.TextCtrl(self,-1,"")
 		labelSocksPort = wx.StaticText(self,-1,"port")
-		self.textSocksPort = wx.TextCtrl(self,-1,"",size=(80,-1))
+		self.textSocksPort = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		hsizerSO.Add(labelSocksAddr,0,wx.ALL,3)
 		hsizerSO.Add(self.textSocksAddr,1,wx.ALL|wx.GROW,3)
 		hsizerSO.Add(labelSocksPort,0,wx.ALL,3)
@@ -460,6 +460,7 @@ class NetworkPanel(wx.Panel):
 		vsizer.Add(hsizerTO,0,wx.ALL|wx.GROW,0)
 		self.SetSizer(vsizer)
 		vsizer.Fit(self)
+		self.requiredSize = vsizer.ComputeFittingWindowSize(self)
 
 	def SetAll(self,conf):
 		try:
@@ -591,10 +592,10 @@ class UserInterfacePanel(wx.Panel):
 		hsizerLS = wx.BoxSizer(wx.HORIZONTAL)
 		labelListSize = wx.StaticText(self,-1,"Message List Window Size",size=(x,-1),style=wx.ALIGN_RIGHT)
 		self.chooseListSize = wx.ComboBox(self,-1,style=wx.CB_DROPDOWN|wx.CB_READONLY)
-		self.chooseListSize.AppendItems(['Small','Medium','Mwide','Portrait','Large','Custom'])
-		self.ListSizeX = wx.TextCtrl(self,-1,"",size=(60,-1))
+		self.chooseListSize.AppendItems(['Small','Medium','Mwide','Portrait','Large','HiDPI','Custom'])
+		self.ListSizeX = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		labelListSizeSep = wx.StaticText(self,-1," x ")
-		self.ListSizeY = wx.TextCtrl(self,-1,"",size=(60,-1))
+		self.ListSizeY = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		hsizerLS.Add(labelListSize,0,wx.ALL,3)
 		hsizerLS.Add(self.chooseListSize,0,wx.ALL,3)
 		hsizerLS.Add(self.ListSizeX,0,wx.ALL,3)
@@ -605,10 +606,10 @@ class UserInterfacePanel(wx.Panel):
 		hsizerVS = wx.BoxSizer(wx.HORIZONTAL)
 		labelViewSize = wx.StaticText(self,-1,"View Window Size",size=(x,-1),style=wx.ALIGN_RIGHT)
 		self.chooseViewSize = wx.ComboBox(self,-1,style=wx.CB_DROPDOWN|wx.CB_READONLY)
-		self.chooseViewSize.AppendItems(['Small','Medium','Portrait','Large','Custom'])
-		self.ViewSizeX = wx.TextCtrl(self,-1,"",size=(60,-1))
+		self.chooseViewSize.AppendItems(['Small','Medium','Portrait','Large','HiDPI','Custom'])
+		self.ViewSizeX = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		labelViewSizeSep = wx.StaticText(self,-1," x ")
-		self.ViewSizeY = wx.TextCtrl(self,-1,"",size=(60,-1))
+		self.ViewSizeY = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		hsizerVS.Add(labelViewSize,0,wx.ALL,3)
 		hsizerVS.Add(self.chooseViewSize,0,wx.ALL,3)
 		hsizerVS.Add(self.ViewSizeX,0,wx.ALL,3)
@@ -619,10 +620,10 @@ class UserInterfacePanel(wx.Panel):
 		hsizerES = wx.BoxSizer(wx.HORIZONTAL)
 		labelEditSize = wx.StaticText(self,-1,"Edit Window Size",size=(x,-1),style=wx.ALIGN_RIGHT)
 		self.chooseEditSize = wx.ComboBox(self,-1,style=wx.CB_DROPDOWN|wx.CB_READONLY)
-		self.chooseEditSize.AppendItems(['Small','Medium','Mwide','Portrait','Large','Custom'])
-		self.EditSizeX = wx.TextCtrl(self,-1,"",size=(60,-1))
+		self.chooseEditSize.AppendItems(['Small','Medium','Mwide','Portrait','Large','HiDPI','Custom'])
+		self.EditSizeX = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		labelEditSizeSep = wx.StaticText(self,-1," x ")
-		self.EditSizeY = wx.TextCtrl(self,-1,"",size=(60,-1))
+		self.EditSizeY = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		hsizerES.Add(labelEditSize,0,wx.ALL,3)
 		hsizerES.Add(self.chooseEditSize,0,wx.ALL,3)
 		hsizerES.Add(self.EditSizeX,0,wx.ALL,3)
@@ -632,10 +633,10 @@ class UserInterfacePanel(wx.Panel):
 
 		hsizerAS = wx.BoxSizer(wx.HORIZONTAL)
 		self.chooseAddrSize = wx.ComboBox(self,-1,style=wx.CB_DROPDOWN|wx.CB_READONLY)
-		self.chooseAddrSize.AppendItems(['Small','Medium','Portrait','Large','Custom'])
-		self.AddrSizeX = wx.TextCtrl(self,-1,"",size=(60,-1))
+		self.chooseAddrSize.AppendItems(['Small','Medium','Portrait','Large','HiDPI','Custom'])
+		self.AddrSizeX = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		labelAddrSizeSep = wx.StaticText(self,-1," x ")
-		self.AddrSizeY = wx.TextCtrl(self,-1,"",size=(60,-1))
+		self.AddrSizeY = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		hsizerAS.Add(labelAddrSize,0,wx.ALL,3)
 		hsizerAS.Add(self.chooseAddrSize,0,wx.ALL,3)
 		hsizerAS.Add(self.AddrSizeX,0,wx.ALL,3)
@@ -646,7 +647,7 @@ class UserInterfacePanel(wx.Panel):
 		hsizerSF = wx.BoxSizer(wx.HORIZONTAL)
 		labelScaleFactor = wx.StaticText(self,-1,"Editor Scale Factor",size=(x,-1),style=wx.ALIGN_RIGHT)
 		hsizerSF.Add(labelScaleFactor,0,wx.ALL,3)
-		self.editorScaleFactor = wx.TextCtrl(self,-1,"",size=(60,-1))
+		self.editorScaleFactor = wx.TextCtrl(self,-1,"",size=(int(global_config.resolution_scale_factor*80),-1))
 		hsizerSF.Add(self.editorScaleFactor,0,wx.ALL,3)
 
 		hsizerNM = wx.BoxSizer(wx.HORIZONTAL)
@@ -770,6 +771,8 @@ class UserInterfacePanel(wx.Panel):
 			SetCB(chooser,'Portrait')
 		elif xv == '1024' and yv == '768':
 			SetCB(chooser,'Large')
+		elif xv == '2048' and yv == '1536':
+			SetCB(chooser,'HiDPI')
 		else:
 			SetCB(chooser,'Custom')
 
@@ -790,6 +793,9 @@ class UserInterfacePanel(wx.Panel):
 		elif val == 'Large':
 			x.SetValue('1024')
 			y.SetValue('768')
+		elif val == 'HiDPI':
+			x.SetValue('2048')
+			y.SetValue('1536')
 		elif val == 'Custom':
 			pass
 
@@ -1039,6 +1045,15 @@ class ConfigDialogFrame(wx.Frame):
 		self.PostLoadFixup()
 		self.UpdatePanes()
 
+		# window size check and fix
+		xo,yo = size
+		xr,yr = self.networkPanel.requiredSize
+		if xo < xr or yo < yr:
+			xn = int(1.1 * xr) if xr > xo else xo
+			yn = int(1.4 * yr) if yr > yo else yo
+			self.SetSize( (xn,yn) )
+		# window size check and fix
+
 	def UpdateAll(self):
 		pass
 	
@@ -1074,14 +1089,20 @@ class ConfigDialogFrame(wx.Frame):
 		self.pubAuthKey = ''
 		self.connectionTimeout = '15 sec'
 		self.newMessageCheck = 'Manual'
-		if sys.platform != 'win32' and sys.platform != 'darwin':
-			self.listWindowSize = '960x600' # keep check/send on screen in Linux
-			self.editWindowSize = '960x600'
+		if wx.SystemSettings.GetMetric(wx.SYS_SCREEN_X) >= 1920:
+			self.listWindowSize = '1024x768'
+			self.editWindowSize = '1024x768'
+			self.viewWindowSize = '1024x768'
+			self.addrWindowSize = '1024x768'
 		else:
-			self.listWindowSize = '800x600'
-			self.editWindowSize = '800x600'
-		self.viewWindowSize = '800x600'
-		self.addrWindowSize = '800x600'
+			if sys.platform != 'win32' and sys.platform != 'darwin':
+				self.listWindowSize = '960x600' # keep check/send on screen in Linux
+				self.editWindowSize = '960x600'
+			else:
+				self.listWindowSize = '800x600'
+				self.editWindowSize = '800x600'
+			self.viewWindowSize = '800x600'
+			self.addrWindowSize = '800x600'
 		self.editorScaleFactor = '1.00'
 		self.newMessageNotification = 'Change Window Title'
  		self.fieldOrder = 'From Subject Date To'
@@ -1792,6 +1813,15 @@ class EasyDialogFrame(ConfigDialogFrame):
 		if sys.platform == 'darwin':
 			panelSizer.Layout()
 
+		# window size check and fix
+		xo,yo = size
+		xr,yr = vsizer.ComputeFittingWindowSize(self)
+		if xo < xr or yo < yr:
+			xn = int(1.1 * xr) if xr > xo else xo
+			yn = int(1.1 * yr) if yr > yo else yo
+			self.SetSize( (xn,yn) )
+		# window size check and fix
+
 	def OnPasteUrlButton(self,event):
 		self.textConfUrl.SetValue("")
 		self.textConfUrl.Paste()
@@ -1988,9 +2018,9 @@ class RunApp(wx.App):
 
 	def OnInit(self):
 		if self.homedir[0:13] == '/\EASYSETUP\/':
-			self.frame = EasyDialogFrame(None,[ 640,600 ],self.homedir[13:],pos = self.pos,app = self)
+			self.frame = EasyDialogFrame(None,[ int(global_config.resolution_scale_factor*640),int(global_config.resolution_scale_factor*600) ],self.homedir[13:],pos = self.pos,app = self)
 		else:
-			self.frame = ConfigDialogFrame(None,[ 640,600 ],self.homedir,pos = self.pos,app = self)
+			self.frame = ConfigDialogFrame(None,[ int(global_config.resolution_scale_factor*640),int(global_config.resolution_scale_factor*600) ],self.homedir,pos = self.pos,app = self)
 		self.frame.Show()
 		self.SetTopWindow(self.frame)
 		return True
