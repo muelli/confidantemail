@@ -1,4 +1,5 @@
 import sys
+import time
 import datetime
 import os
 import find_gpg_homedir
@@ -42,10 +43,10 @@ process_new_message_interval = 1000 # ms
 check_send_ack_interval = 1000 # ms
 check_for_acks_interval = 60.0 # sec
 upgrade_check_server = 'latestversion.confidantmail.org'
-upgrade_check_expected_version = 28
+upgrade_check_expected_version = 29
 upgrade_check_duration = 60000
 status_display_time = 10000 # ten seconds
-software_version = '0.42' # B
+software_version = '0.43' # B
 max_insert_image_size = 1048576
 help_file = os.path.dirname(os.path.realpath(sys.argv[0])) + os.sep + "help.zip"
 resolution_scale_factor = 1
@@ -80,5 +81,20 @@ class date_format:
 		changed_datetime = datetime.datetime.fromtimestamp(timestamp_out)
 		formatted_datetime = changed_datetime.strftime("%a %Y-%m-%d %I:%M:%S %p")
 		return formatted_datetime
+
+	def get_tzoffset(self):
+		if ((time.daylight == 1) and (time.localtime().tm_isdst == 1)):
+			tzoffset = time.altzone
+		else:
+			tzoffset = time.timezone
+		tzoffset = tzoffset / -3600
+		if tzoffset == 0:
+			tzoffset = '[UTC]'
+		elif tzoffset > 0:
+			tzoffset = '[UTC+'+str(tzoffset)+']'
+		else:
+			tzoffset = '[UTC'+str(tzoffset)+']'
+		return tzoffset
+
 
 # EOF

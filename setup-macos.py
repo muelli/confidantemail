@@ -45,7 +45,7 @@ icon = 'keyicon.icns' )
  
 setup(
 name = "Confidant Mail",
-version = "0.42",
+version = "0.43",
 description = "Confidant Mail",
 author = 'Mike Ingle',
 executables = [gui],

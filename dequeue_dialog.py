@@ -273,6 +273,12 @@ class DequeueDialogFrame(wx.Frame):
 		self.helpcon.AddBook(global_config.help_file,0)
 		self.helpcon.DisplayContents()
 		self.helpcon.Display("config_chooser.html")
+		if global_config.resolution_scale_factor != 1.0:
+			frame = self.helpcon.GetFrame()
+			frameX,frameY = frame.GetSize()
+			frameX *= global_config.resolution_scale_factor
+			frameY *= global_config.resolution_scale_factor
+			frame.SetSize( (frameX,frameY) )
 
 	def OnClose(self,event):
 		self.Destroy()

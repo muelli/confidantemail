@@ -1340,6 +1340,12 @@ class ConfigDialogFrame(wx.Frame):
 			self.helpcon.Display("client_setup_public.html") # TODO
 		else:
 			self.helpcon.Display("config_dialog_identity.html")
+		if global_config.resolution_scale_factor != 1.0:
+			frame = self.helpcon.GetFrame()
+			frameX,frameY = frame.GetSize()
+			frameX *= global_config.resolution_scale_factor
+			frameY *= global_config.resolution_scale_factor
+			frame.SetSize( (frameX,frameY) )
 
 	def CheckSettings(self):
 		self.identityPanel.GetAll(self)

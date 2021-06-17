@@ -406,7 +406,7 @@ class MessageEditFrame(wx.Frame):
 			self.toolbar.AddLabelTool(id_add_picture, "Add Picture", addimage_bmp, shortHelp="Add Picture", longHelp="Add a picture")
 			self.toolbar.AddLabelTool(id_address_book, "Address Book", contacts_bmp, shortHelp="Address Book", longHelp="Select or look up addresses")
 			self.toolbar.AddLabelTool(id_send, "Send Msg", send_bmp, shortHelp="Send", longHelp="Send the message")
-			self.toolbar.AddLabelTool(id_send_later, "Send Later", send_bmp, shortHelp="Send after delay", longHelp="Queue the message on the server to be sent later")
+			self.toolbar.AddLabelTool(id_send_later, "Send Later", send_bmp, shortHelp="Send after a delay, or use 0 to proxy send immmediately", longHelp="Queue the message on the server to be sent later")
 		self.toolbar.AddLabelTool(id_save_draft, "Save Draft", save_bmp, shortHelp="Save Draft", longHelp="Save to Drafts and Close")
 		self.Bind(wx.EVT_TOOL,self.OnSaveDraftClick,id = id_save_draft)
 		if sent_message == True:
@@ -738,7 +738,7 @@ class MessageEditFrame(wx.Frame):
 				origCc += line + '\n'
 				origCcList.append(line[4:])
 			elif re_datetime.match(line) != None:
-				origDate = 'Date: ' + self.date_formatter.localize_datetime(line[6:]) + '\n'
+				origDate = 'Date: ' + self.date_formatter.localize_datetime(line[6:]) + ' ' + self.date_formatter.get_tzoffset() + '\n'
 			elif lineU[0:9] == 'SUBJECT: ':
 				origSubject = line
 

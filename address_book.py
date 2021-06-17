@@ -395,6 +395,12 @@ class AddressBookFrame(wx.Frame):
 		self.helpcon.AddBook(global_config.help_file,0)
 		self.helpcon.DisplayContents()
 		self.helpcon.Display("address_book.html")
+		if global_config.resolution_scale_factor != 1.0:
+			frame = self.helpcon.GetFrame()
+			frameX,frameY = frame.GetSize()
+			frameX *= global_config.resolution_scale_factor
+			frameY *= global_config.resolution_scale_factor
+			frame.SetSize( (frameX,frameY) )
 
 	def OnImport(self,event):
 		nr = self.keyListCtrl.GetItemCount()
