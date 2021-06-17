@@ -403,7 +403,7 @@ class RepairFolderIndex:
 			if (nMessages % 100 == 0):
 				newFolders.commit()
 			if (nKeys % 10000 == 0):
-				self.output("Processing key = %i, messages = %i",(nKeys,nMessages))
+				self.output("Processing key = %i, messages = %i" % (nKeys,nMessages))
 		self.output("Total keys = %i, total messages = %i" % (nKeys,nMessages))
 		newFolders.commit()
 		dbmFile.close()
@@ -469,4 +469,3 @@ class RunApp(wx.App):
 
 
 # EOF
-
